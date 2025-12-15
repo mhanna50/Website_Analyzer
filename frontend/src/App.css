@@ -778,6 +778,8 @@ html {
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   align-items: center;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .metric-row:last-child {
@@ -790,14 +792,40 @@ html {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
+  max-width: 40%;
 }
 
 .metric-row dd {
   margin: 0;
   color: #ececf1;
   font-weight: 600;
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  text-align: right;
+  max-width: 60%;
+}
+
+.metric-row--url {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.metric-row--url dt {
+  max-width: 100%;
+}
+
+.metric-row--url dd {
+  max-width: 100%;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
   word-break: break-word;
   overflow-wrap: anywhere;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 10px;
+  border-radius: 10px;
 }
 
 .list-card {

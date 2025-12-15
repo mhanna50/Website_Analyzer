@@ -88,7 +88,7 @@ export default function ReportView({
         <article>
           <h3>Network</h3>
           <dl>
-            <Metric label="URL" value={analysis.network.url} />
+            <Metric label="URL" value={analysis.network.url} isUrl />
             <Metric label="Status Code" value={analysis.network.statusCode || 'N/A'} />
             <Metric label="Response Time" value={`${analysis.network.responseTimeMs} ms`} />
             {analysis.network.errorMessage && (
@@ -194,12 +194,14 @@ export default function ReportView({
 function Metric({
   label,
   value,
+  isUrl = false,
 }: {
   label: string
   value: string | number | null | undefined
+  isUrl?: boolean
 }) {
   return (
-    <div className="metric-row">
+    <div className={`metric-row${isUrl ? ' metric-row--url' : ''}`}>
       <dt>{label}</dt>
       <dd>{value ?? 'N/A'}</dd>
     </div>

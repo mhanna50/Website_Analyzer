@@ -6,6 +6,49 @@ using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using SiteMonitor.Api.Services;
 
+LoadDotEnv();
+
+static void LoadDotEnv()
+{
+    try
+    {
+        var current = Directory.GetCurrentDirectory();
+        while (!string.IsNullOrEmpty(current))
+        {
+            var envPath = Path.Combine(current, ".env");
+            if (File.Exists(envPath))
+            {
+                foreach (var rawLine in File.ReadAllLines(envPath))
+                {
+                    var line = rawLine.Trim();
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    var separatorIndex = line.IndexOf('=');
+                    if (separatorIndex <= 0)
+                    {
+                        continue;
+                    }
+
+                    var key = line[..separatorIndex].Trim();
+                    var value = line[(separatorIndex + 1)..].Trim();
+                    Environment.SetEnvironmentVariable(key, value);
+                }
+
+                break;
+            }
+
+            current = Directory.GetParent(current)?.FullName;
+        }
+    }
+    catch
+    {
+        // Ignore dotenv errors; environment variables can be set elsewhere.
+    }
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -1129,54 +1172,54 @@ static void CollectSchemaTypes(JsonElement element, ICollection<string> output)
     switch (element.ValueKind)
     {
         case JsonValueKind.Object:
-        {
-            if (element.TryGetProperty("@type", out var typeElement))
             {
-                if (typeElement.ValueKind == JsonValueKind.String)
+                if (element.TryGetProperty("@type", out var typeElement))
                 {
-                    var value = typeElement.GetString();
-                    if (!string.IsNullOrWhiteSpace(value))
+                    if (typeElement.ValueKind == JsonValueKind.String)
                     {
-                        output.Add(value);
-                    }
-                }
-                else if (typeElement.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (var nested in typeElement.EnumerateArray())
-                    {
-                        if (nested.ValueKind == JsonValueKind.String)
+                        var value = typeElement.GetString();
+                        if (!string.IsNullOrWhiteSpace(value))
                         {
-                            var value = nested.GetString();
-                            if (!string.IsNullOrWhiteSpace(value))
+                            output.Add(value);
+                        }
+                    }
+                    else if (typeElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var nested in typeElement.EnumerateArray())
+                        {
+                            if (nested.ValueKind == JsonValueKind.String)
                             {
-                                output.Add(value);
+                                var value = nested.GetString();
+                                if (!string.IsNullOrWhiteSpace(value))
+                                {
+                                    output.Add(value);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            if (element.TryGetProperty("@graph", out var graphElement))
-            {
-                CollectSchemaTypes(graphElement, output);
-            }
+                if (element.TryGetProperty("@graph", out var graphElement))
+                {
+                    CollectSchemaTypes(graphElement, output);
+                }
 
-            foreach (var property in element.EnumerateObject())
-            {
-                CollectSchemaTypes(property.Value, output);
-            }
+                foreach (var property in element.EnumerateObject())
+                {
+                    CollectSchemaTypes(property.Value, output);
+                }
 
-            break;
-        }
+                break;
+            }
         case JsonValueKind.Array:
-        {
-            foreach (var child in element.EnumerateArray())
             {
-                CollectSchemaTypes(child, output);
-            }
+                foreach (var child in element.EnumerateArray())
+                {
+                    CollectSchemaTypes(child, output);
+                }
 
-            break;
-        }
+                break;
+            }
     }
 }
 
