@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using SiteMonitor.Api.Services;
 
+LoadDotEnv();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -710,6 +712,47 @@ static double ScoreFromRange(double value, double goodThreshold, double poorThre
 
     var ratio = (value - goodThreshold) / (poorThreshold - goodThreshold);
     return ClampScore(100 - (ratio * 100));
+}
+
+static void LoadDotEnv()
+{
+    try
+    {
+        var current = Directory.GetCurrentDirectory();
+        while (!string.IsNullOrEmpty(current))
+        {
+            var envPath = Path.Combine(current, ".env");
+            if (File.Exists(envPath))
+            {
+                foreach (var rawLine in File.ReadAllLines(envPath))
+                {
+                    var line = rawLine.Trim();
+                    if (string.IsNullOrEmpty(line) || line.StartsWith("#", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    var separatorIndex = line.IndexOf('=');
+                    if (separatorIndex <= 0)
+                    {
+                        continue;
+                    }
+
+                    var key = line[..separatorIndex].Trim();
+                    var value = line[(separatorIndex + 1)..].Trim();
+                    Environment.SetEnvironmentVariable(key, value);
+                }
+
+                break;
+            }
+
+            current = Directory.GetParent(current)?.FullName;
+        }
+    }
+    catch
+    {
+        // Ignore dotenv loading failures; environment variables can be set elsewhere.
+    }
 }
 
 static AnalysisReport BuildReport(AnalysisResult analysis)

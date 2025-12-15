@@ -11,6 +11,7 @@ obj/
 
 # User secrets / configs
 appsettings.Development.local.json
+.env
 *.user
 *.suo
 *.swp
