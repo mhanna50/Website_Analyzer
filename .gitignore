@@ -8,6 +8,7 @@ obj/
 **/.playwright/
 **/PlaywrightLogs/
 
+
 # User secrets / configs
 appsettings.Development.local.json
 *.user
