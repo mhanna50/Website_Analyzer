@@ -1,0 +1,34 @@
+# Build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Playwright artifacts
+**/.playwright/
+**/PlaywrightLogs/
+
+# User secrets / configs
+appsettings.Development.local.json
+*.user
+*.suo
+*.swp
+
+# Logs
+*.log
+logs/
+
+# IDE directories
+.DS_Store
+.vscode/
+.idea/
+
+# Node/Vite outputs
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Coverage / temp
+coverage/
+temp/
