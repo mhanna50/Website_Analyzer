@@ -11,10 +11,11 @@ obj/
 
 # User secrets / configs
 appsettings.Development.local.json
-.env
+appsettings.Development.json
 *.user
 *.suo
 *.swp
+.env
 
 # Logs
 *.log
