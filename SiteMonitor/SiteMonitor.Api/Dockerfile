@@ -36,7 +36,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Install the system libraries Playwright's Chromium build needs at runtime.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libasound2 \
+    libasound2t64 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
     libatspi2.0-0 \
