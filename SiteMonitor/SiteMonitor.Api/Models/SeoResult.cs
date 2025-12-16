@@ -1,0 +1,61 @@
+using System;
+using System.Collections.Generic;
+
+namespace SiteMonitor.Api.Models;
+
+public record SeoResult(
+    string Title,
+    int TitleLength,
+    string MetaDescription,
+    int MetaDescriptionLength,
+    string CanonicalUrl,
+    bool IsIndexable,
+    int H1Count,
+    int H2Count,
+    bool HasViewportMeta,
+    string ViewportContent,
+    int TotalImages,
+    int ImagesWithoutAlt,
+    int InternalLinkCount,
+    int ExternalLinkCount,
+    bool UsesHttps,
+    bool DomFromHeadlessBrowser,
+    bool HasLanguageAttribute,
+    bool HasSkipLink,
+    int LandmarkCount,
+    int FormControlsWithoutLabels,
+    int StructuredDataCount,
+    IReadOnlyList<string> StructuredDataTypes,
+    bool HasOpenGraphTags,
+    bool HasTwitterCard,
+    int BrokenLinkCount,
+    IReadOnlyList<BrokenLink> BrokenLinks)
+{
+    public static SeoResult Empty { get; } = new(
+        string.Empty,
+        0,
+        string.Empty,
+        0,
+        string.Empty,
+        true,
+        0,
+        0,
+        false,
+        string.Empty,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        0,
+        0,
+        Array.Empty<string>(),
+        false,
+        false,
+        0,
+        Array.Empty<BrokenLink>());
+}

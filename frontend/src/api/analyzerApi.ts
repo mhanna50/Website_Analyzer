@@ -7,6 +7,14 @@ export type NetworkResult = {
   responseTimeMs: number
   checkedAtUtc: string
   errorMessage?: string | null
+  redirectCount: number
+}
+
+export type BrokenLink = {
+  url: string
+  isInternal: boolean
+  statusCode: number
+  reason?: string | null
 }
 
 export type SeoResult = {
@@ -34,6 +42,8 @@ export type SeoResult = {
   structuredDataTypes: string[]
   hasOpenGraphTags: boolean
   hasTwitterCard: boolean
+  brokenLinkCount: number
+  brokenLinks: BrokenLink[]
 }
 
 export type ScoreResult = {
@@ -82,8 +92,11 @@ export type AnalysisResult = {
   aiInsights?: AiInsightsResult | null
 }
 
+export type ScanMode = 'Fast' | 'Deep'
+
 type AnalyzeRequest = {
   url: string
+  mode?: ScanMode
 }
 
 export async function analyzeWebsite(url: string): Promise<AnalysisResult> {

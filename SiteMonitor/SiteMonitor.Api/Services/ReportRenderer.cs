@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Microsoft.Playwright;
+using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services;
 
@@ -154,6 +155,7 @@ public class ReportRenderer
         builder.AppendLine("<div class=\"grid\">");
         builder.AppendLine(BuildSummaryCard("Status", report.Performance.Network.StatusCode.ToString()));
         builder.AppendLine(BuildSummaryCard("Response Time", $"{report.Performance.Network.ResponseTimeMs} ms"));
+        builder.AppendLine(BuildSummaryCard("Redirects", report.Performance.Network.RedirectCount.ToString()));
         if (report.Performance.Details is { } perf)
         {
             builder.AppendLine(BuildSummaryCard("LCP", FormatMs(perf.LargestContentfulPaintMs)));
@@ -175,6 +177,7 @@ public class ReportRenderer
         builder.AppendLine(BuildSummaryCard("Images Missing Alt", report.Seo.Details.ImagesWithoutAlt.ToString()));
         builder.AppendLine(BuildSummaryCard("Internal Links", report.Seo.Details.InternalLinkCount.ToString()));
         builder.AppendLine(BuildSummaryCard("External Links", report.Seo.Details.ExternalLinkCount.ToString()));
+        builder.AppendLine(BuildSummaryCard("Broken Links", report.Seo.Details.BrokenLinkCount.ToString()));
         builder.AppendLine("</div>");
         builder.AppendLine("</div>");
 

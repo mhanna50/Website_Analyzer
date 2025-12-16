@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services;
 
@@ -100,9 +101,3 @@ public class SpaDomAnalyzer
         return false;
     }
 }
-
-public record SpaDomAnalysisResult(
-    int TotalImages,
-    int ImagesWithoutAlt,
-    int InternalLinkCount,
-    int ExternalLinkCount);

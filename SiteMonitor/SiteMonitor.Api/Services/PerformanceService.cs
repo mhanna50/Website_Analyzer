@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services;
 

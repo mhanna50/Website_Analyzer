@@ -2,6 +2,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services;
 
@@ -100,6 +101,7 @@ public class AiInsightsService
         builder.AppendLine($"HTTP status: {analysis.Network.StatusCode}");
         builder.AppendLine($"Network error: {analysis.Network.ErrorMessage ?? "None"}");
         builder.AppendLine($"Response time (ms): {analysis.Network.ResponseTimeMs}");
+        builder.AppendLine($"Redirect count: {analysis.Network.RedirectCount}");
         builder.AppendLine($"Performance score: {analysis.Score.Speed}");
         builder.AppendLine($"SEO score: {analysis.Score.Seo}");
 
@@ -162,7 +164,7 @@ public class AiInsightsService
         builder.AppendLine("- Include at least one concrete step that describes how to execute the fix for each issue.");
         builder.AppendLine("- Only highlight issues that the above data exposes; avoid generic filler.");
         builder.AppendLine("- Format output exactly as markdown with '## Performance' and '## SEO' sections containing '- [ ]' bullets.");
-        builder.AppendLine("- Aim for at least three actionable bullets per section when problems exist.");
+        builder.AppendLine("- Return as many or as few checklist bullets as the data requires; skip padding.");
 
         return builder.ToString();
     }

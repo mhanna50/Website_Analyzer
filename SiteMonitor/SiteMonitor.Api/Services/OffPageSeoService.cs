@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
+using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services;
 

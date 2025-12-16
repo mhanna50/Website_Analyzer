@@ -202,5 +202,41 @@
     "overallScore": 62,
     "seoScore": 70,
     "speedScore": 56
+  },
+  {
+    "url": "https://www.hannawebstudio.com/",
+    "timestampUtc": "2025-12-16T16:08:10.374967Z",
+    "statusCode": 200,
+    "responseTimeMs": 171,
+    "performanceScore": 60,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 62,
+    "seoScore": 70,
+    "speedScore": 56
+  },
+  {
+    "url": "https://www.hannawebstudio.com/",
+    "timestampUtc": "2025-12-16T16:21:30.380756Z",
+    "statusCode": 200,
+    "responseTimeMs": 164,
+    "performanceScore": 60,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 62,
+    "seoScore": 70,
+    "speedScore": 56
+  },
+  {
+    "url": "https://www.hannawebstudio.com/",
+    "timestampUtc": "2025-12-16T16:59:28.906975Z",
+    "statusCode": 200,
+    "responseTimeMs": 161,
+    "performanceScore": 60,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 62,
+    "seoScore": 70,
+    "speedScore": 56
   }
 ]

@@ -8,33 +8,32 @@ export default function SplashScreen({ onContinue }: SplashScreenProps) {
       <div className="splash-card">
         <div>
           <p className="splash-eyebrow">Welcome to Site Analyzer</p>
-          <h1 className="splash-title">See your website like an analyst would</h1>
+          <h1 className="splash-title">Deep audits to diagnose your site</h1>
           <p className="splash-subtitle">
-            This companion app recreates the conversational feeling of ChatGPT, but every exchange
-            is focused on performance, SEO, and accessibility truth data pulled from your site.
+            Queue a quick sanity check and a full Playwright + Core Web Vitals crawl. Every response
+            couples AI guidance with the raw metrics that prove why a fix matters.
           </p>
         </div>
 
         <div className="splash-text">
           <p>
-            <strong>What it does.</strong> Scrapes any URL, runs Core Web Vitals, inspects HTML
-            metadata, and taps external APIs for backlink and authority insights—all in one
-            conversational report.
+            <strong>What it does.</strong> Renders the DOM (even SPA routes), runs PageSpeed, checks
+            structured data and social tags, probes for broken links, and feeds the results into an
+            AI checklist that becomes an interactive to-do list.
           </p>
           <p>
-            <strong>How to use it.</strong> Paste a URL, press enter, and read the chat-style
-            breakdown. Scroll for raw metrics, then use the checklist at the bottom to plan fixes one
-            checkbox at a time.
+            <strong>How to use it.</strong> Paste a URL and press enter to perform a deep search. Let the queue
+            handle longer jobs, then open the cards to see red/green statuses, fix lists, and PDF or
+            checklist exports.
           </p>
           <p>
-            <strong>Why it matters.</strong> Fast, indexable sites convert better and rank higher.
-            This tool highlights the bottlenecks that slow you down so you can prioritize fixes with
-            confidence.
+            <strong>Why it matters.</strong> Clients and site owners want proof their tech works how it should, how to fix it, and what to fix. Every card explains
+            what the fields mean, shows the current health, and lists exactly how to fix problems.
           </p>
           <p>
-            <strong>Why I built it.</strong> I wanted a transparent alternative to black-box SEO
-            audits—something that feels like ChatGPT but grounds every recommendation in measurable
-            performance and SEO data.
+            <strong>Why I built it.</strong> To showcase full-stack depth: Playwright crawling,
+            throttled analyzers, async queues, automated tests, and front-end polish in a single,
+            transparent audit tool.
           </p>
         </div>
 

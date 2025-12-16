@@ -7,15 +7,18 @@ A full-stack tool that audits any URL for performance, on-page SEO, accessibilit
 
 ##  Highlights
 
-- **Network checks** – reachability, SSL/HTTPS, redirects, HTTP status, response time.
+- **Network checks** – reachability, HTTPS, redirect counts, HTTP status, response time, and surfaced server errors.
 - **Core Web Vitals** – LCP, FCP, CLS, TBT via Google PageSpeed (mobile + desktop strategies).
 - **On-page SEO** – title/meta/canonical quality, headings, viewport meta, indexability, robots directives, internal/external link counts, image alt coverage (even on SPAs thanks to Playwright DOM rendering).
-- **Accessibility heuristics** – missing `lang`, skip links, landmarks, unlabeled form controls.
-- **Structured data & social tags** – JSON-LD counts, Open Graph, Twitter cards.
-- **Off-page SEO (optional)** – domain authority, backlinks, referring domains (pluggable provider).
-- **AI optimization checklist** – OpenAI summarizes the scan into actionable, checkbox-ready steps.
+- **Accessibility heuristics** – missing `lang`, skip links, landmarks, unlabeled form controls, and actionable fix lists inside each card.
+- **Structured data & social tags** – JSON-LD counts/types, Open Graph, Twitter cards, plus contextual tooltips so teammates know why these fields matter.
+- **Link health** – crawls rendered DOM links and performs async HTTP checks to flag broken internal/external URLs.
+- **Scan modes** – Fast mode skips heavy services for instant triage, Deep mode runs the full Playwright + off-page + AI stack.
+- **Async queue + throttler** – background worker processes queued scans safely while per-instance throttling limits concurrent crawls.
+- **AI optimization checklist** – OpenAI produces markdown checklists that become interactive to-do lists in the UI.
 - **Downloadable report** – Playwright renders a polished PDF summarizing every card.
 - **History sidebar** – jump back to any previous scan and compare scores.
+- **Automated tests** – xUnit coverage for SEO parsing, scoring math, link health analyzer, and recommendation builder.
 
 ---
 
@@ -24,7 +27,7 @@ A full-stack tool that audits any URL for performance, on-page SEO, accessibilit
 | Layer | Tools | Responsibilities |
 | ----- | ----- | ---------------- |
 | **Frontend** | React + Vite + TypeScript | URL input, loading states, chat-style analyzer status, report cards, AI checklist, collapsible history. |
-| **Backend** | ASP.NET Core Minimal API (.NET 8) | Endpoint orchestration, network/SEO analyzers, scoring engine, history persistence, PDF rendering. |
+| **Backend** | ASP.NET Core Minimal API (.NET 8) | Endpoint orchestration, network/SEO analyzers, link health checker, scoring engine, queue/throttler, history persistence, PDF rendering. |
 | **Parsing/Rendering** | HtmlAgilityPack, Playwright | Parses static HTML, renders client-side DOMs, captures screenshots/PDF. |
 | **External APIs** | Google PageSpeed, OpenAI Chat Completions, optional SEO providers | Supplies Core Web Vitals, generative checklist, and off-page metrics. |
 | **Secrets** | `.env` + `LoadDotEnv()` | All API keys live outside source control; `appsettings*.json` contains placeholders only. |
@@ -55,13 +58,22 @@ flowchart TD
 
 ##  Frontend Experience
 
-- **Empty state** – vertically centered hero text + multi-line URL input.
+- **Splash / empty state** – explains Fast vs Deep scans and what data is captured.
 - **Chat pane** – analyzer messages only (the “You” bubble is suppressed once a scan starts).
-- **Score cards** – smooth view transitions, no awkward word-breaks (“Present” stays intact).
-- **Detail grid** – network, headings, accessibility, structured data, off-page.
-- **AI Checklist** – each bullet becomes a checkbox so you can track progress live.
+- **Score cards** – smooth view transitions with descriptive tooltips and red/green status chips.
+- **Detail grid** – network, headings, accessibility, structured data & social, off-page, each with toggleable “Fix these” drawers.
+- **Link health callouts** – broken URLs appear both in the headings card and as top-level alerts.
+- **AI Checklist** – every OpenAI bullet becomes a persistent checkbox so you can track progress live.
 - **History panel** – collapsible desktop drawer + mobile overlay.
 - **Download PDF** – fetches `/api/report/pdf` to hand clients a shareable artifact.
+
+##  Scan Modes & Queue
+
+- `ScanMode.Fast` (default) skips Playwright/off-page calls and checks only the essentials—perfect for quick triage or batching.
+- `ScanMode.Deep` runs the full pipeline (Playwright DOM render, PageSpeed snapshots, off-page metrics, AI checklist, PDF).
+- `/api/analyze/async` enqueues a scan for background processing. Poll `/api/analyze/async/{jobId}` to track status while the hosted worker respects concurrency limits via `AnalysisThrottler`.
+
+Both sync and async paths share the same analyzers, so escalating a queued scan to Deep mode is just a payload change.
 
 ---
 
@@ -105,7 +117,27 @@ Open the frontend (e.g., http://localhost:5173), paste a URL, click “Analyze,�
 - **HTTPS redirection** is enabled; in dev you may see “Failed to determine the https port” warnings if the launch profile only specifies HTTP—harmless, but set `ASPNETCORE_HTTPS_PORT` to silence it.
 - **Playwright** bundles platform-specific binaries; they stay out of Git thanks to `.gitignore`.
 - **HistoryStore** currently uses a simple JSON file for demo purposes; swap in Redis/DB for multi-user scenarios.
+- **LinkHealthAnalyzer** uses `HttpClientFactory` + throttled HEAD/GET requests and backs off in Fast mode to avoid overloading hosts.
 - **AI prompt** enforces that every checklist bullet references the site and includes actionable steps, cleaning up any leftover Markdown checkboxes before rendering in React.
+- **Automated tests** cover scoring math, SEO parsing, recommendations, and link health; run them with `dotnet test`.
+
+---
+
+##  Testing
+
+```bash
+cd SiteMonitor.Tests
+dotnet test
+```
+
+The suite uses xUnit to validate:
+
+- `SeoBuilder` (headings/accessibility parsing & SPA overrides)
+- `ScoreCalculator` weighting and overall math
+- `LinkHealthAnalyzer` concurrency limits and internal/external detection
+- `RecommendationBuilder` generation + AI checklist parsing
+
+CI-ready output ensures future refactors keep the analyzer trustworthy.
 
 ---
 
