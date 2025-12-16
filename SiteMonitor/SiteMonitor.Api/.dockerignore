@@ -1,0 +1,12 @@
+bin
+obj
+.vs
+.vscode
+*.user
+*.suo
+*.csproj.user
+*.http
+*.log
+.env
+.env.*
+Dockerfile.*
