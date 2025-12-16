@@ -98,6 +98,11 @@ export default function ChatView({
           isLoading={isLoading}
           error={error}
           placeholder={placeholder}
+          showRerun={Boolean(session.analysis)}
+          onRerun={() => {
+            if (!session.analysis) return
+            onSubmit(session.analysis.url)
+          }}
         />
       </div>
     </div>

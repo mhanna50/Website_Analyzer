@@ -165,6 +165,7 @@ public class AiInsightsService
         builder.AppendLine("- Only highlight issues that the above data exposes; avoid generic filler.");
         builder.AppendLine("- Format output exactly as markdown with '## Performance' and '## SEO' sections containing '- [ ]' bullets.");
         builder.AppendLine("- Return as many or as few checklist bullets as the data requires; skip padding.");
+        builder.AppendLine("- Do not output code fences or raw HTML snippets; summarize the required fix in plain language.");
 
         return builder.ToString();
     }

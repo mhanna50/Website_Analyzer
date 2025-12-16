@@ -93,8 +93,11 @@ export default function HistoryPanel({
       </div>
       <div className="history-items">
         {sessions.length === 0 && <p className="history-empty">No reports yet.</p>}
-        {sessions.map((session) => {
+        {sessions.map((session, index) => {
           const isActive = session.id === selectedSessionId
+          const hasOlderDuplicate = sessions
+            .slice(index + 1)
+            .some((other) => other.title === session.title)
           return (
             <button
               key={session.id}
@@ -104,10 +107,18 @@ export default function HistoryPanel({
             >
               <span className="history-title">{session.title}</span>
               <span className="history-meta">
-                {new Date(session.createdAt).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                <span>
+                  {new Date(session.createdAt).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                  {' · '}
+                  {new Date(session.createdAt).toLocaleTimeString(undefined, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+                {hasOlderDuplicate && <span className="history-new-pill">Latest</span>}
               </span>
             </button>
           )

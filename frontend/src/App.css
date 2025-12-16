@@ -458,6 +458,28 @@ html {
   height: 18px;
 }
 
+.input-card .rerun-button {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #cfeeed;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0 16px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 18px;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.input-card .rerun-button:hover:not(:disabled) {
+  border-color: rgba(88, 255, 200, 0.8);
+  color: #5af5c5;
+  background: rgba(90, 245, 197, 0.08);
+}
+
 .error-text {
   color: #ff8a8a;
   margin: 0;
@@ -622,11 +644,11 @@ html {
   color: #f2f2fd;
   text-align: left;
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .history-item:hover {
@@ -649,6 +671,19 @@ html {
 .history-meta {
   font-size: 0.75rem;
   color: #8c8da7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-new-pill {
+  border: 1px solid rgba(90, 245, 197, 0.4);
+  color: #5af5c5;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 2px 8px;
 }
 
 .history-empty {
@@ -696,6 +731,21 @@ html {
   flex-direction: column;
   gap: 24px;
   margin-top: 16px;
+}
+
+.report-appear {
+  animation: reportFade 0.45s ease both;
+}
+
+@keyframes reportFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .score-grid {

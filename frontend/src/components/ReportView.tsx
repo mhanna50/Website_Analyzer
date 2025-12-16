@@ -84,7 +84,7 @@ export default function ReportView({
   }
 
   return (
-    <section className="report-view">
+    <section className="report-view report-appear">
       {analysis.seo.brokenLinkCount > 0 && (
         <div className="broken-link-callout">
           <strong>{analysis.seo.brokenLinkCount} broken link(s) detected</strong>
@@ -430,14 +430,11 @@ function parseAiInsights(raw: string): InsightSection[] {
     return []
   }
 
-  const sections: InsightSection[] = []
-  let current: InsightSection = { title: 'Checklist', items: [] }
-
-  const pushSection = () => {
-    if (current.items.length > 0) {
-      sections.push(current)
-    }
+  const buckets: Record<'Performance' | 'SEO', string[]> = {
+    Performance: [],
+    SEO: [],
   }
+  let current: keyof typeof buckets = 'Performance'
 
   raw.split(/\r?\n/).forEach((line) => {
     const trimmed = line.trim()
@@ -449,14 +446,12 @@ function parseAiInsights(raw: string): InsightSection[] {
     const explicitHeading = trimmed.match(/^(.+?)[：:]\s*$/)
 
     if (markdownHeading) {
-      pushSection()
-      current = { title: markdownHeading[1].trim(), items: [] }
+      current = resolveSection(markdownHeading[1])
       return
     }
 
     if (explicitHeading && explicitHeading[1].length > 1) {
-      pushSection()
-      current = { title: explicitHeading[1].trim(), items: [] }
+      current = resolveSection(explicitHeading[1])
       return
     }
 
@@ -468,12 +463,27 @@ function parseAiInsights(raw: string): InsightSection[] {
     const normalized = bulletMatch ? bulletMatch[1].trim() : trimmed
     const sanitized = normalized.replace(/^\[\s?[xX]?\]\s*/, '').trim()
     if (sanitized) {
-      current.items.push(sanitized)
+      buckets[current].push(sanitized)
     }
   })
 
-  pushSection()
-  return sections
+  return (Object.keys(buckets) as Array<keyof typeof buckets>)
+    .filter((key) => buckets[key].length > 0)
+    .map((key) => ({
+      title: key,
+      items: buckets[key],
+    }))
+}
+
+function resolveSection(heading: string): 'Performance' | 'SEO' {
+  const normalized = heading.toLowerCase()
+  if (normalized.includes('seo')) {
+    return 'SEO'
+  }
+  if (normalized.includes('performance')) {
+    return 'Performance'
+  }
+  return 'Performance'
 }
 
 function slugify(value: string) {

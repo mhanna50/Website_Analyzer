@@ -9,6 +9,8 @@ type InputBarProps = {
   ariaLabel?: string
   isLoading?: boolean
   error?: string | null
+  onRerun?: () => void
+  showRerun?: boolean
 }
 
 const MAX_HEIGHT = 200
@@ -21,6 +23,8 @@ export default function InputBar({
   ariaLabel = 'Enter a site URL or question',
   isLoading = false,
   error,
+  onRerun,
+  showRerun = false,
 }: InputBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -84,6 +88,16 @@ export default function InputBar({
             </>
           )}
         </button>
+        {showRerun && (
+          <button
+            type="button"
+            className="rerun-button"
+            onClick={onRerun}
+            disabled={isLoading}
+          >
+            Re-run report
+          </button>
+        )}
       </div>
     </form>
   )
