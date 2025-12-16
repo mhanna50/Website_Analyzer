@@ -30,11 +30,14 @@ builder.Services.AddSingleton<ScanQueue>();
 builder.Services.AddHostedService<ScanWorker>();
 
 const string FrontendCorsPolicy = "Frontend";
+var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"]
+    ?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+    ?? new[] { "http://localhost:5173" };
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

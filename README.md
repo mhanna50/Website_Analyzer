@@ -89,6 +89,8 @@ Both sync and async paths share the same analyzers, so escalating a queued scan 
    ```
 2. `.env` is gitignored; `LoadDotEnv()` walks up directories so the API finds it even when running from `SiteMonitor/SiteMonitor.Api/`.
 3. `appsettings*.json` contains empty placeholders, keeping secrets out of commits.
+4. Set `ALLOWED_ORIGINS` (comma-separated list) before deploying to Render so CORS accepts your Vercel domain (e.g., `https://your-app.vercel.app`). Use `http://localhost:5173` for local dev.
+5. On Vercel, set `VITE_API_BASE_URL=https://<your-render-app>.onrender.com` so the frontend calls the hosted API. For local dev, set `VITE_API_BASE_URL=http://localhost:5218`.
 
 ---
 
@@ -98,14 +100,23 @@ Both sync and async paths share the same analyzers, so escalating a queued scan 
 git clone https://github.com/mhanna50/Website_Speed_Analyzer.git
 cd Website_Speed_Analyzer
 
-# Backend
+# Backend (local)
 cd SiteMonitor/SiteMonitor.Api
 dotnet run
 
-# Frontend
+# Frontend (local)
 cd ../frontend
+cp .env.example .env # set VITE_API_BASE_URL if hitting a hosted backend
 npm install
 npm run dev
+# Render / Docker build
+cd SiteMonitor/SiteMonitor.Api
+npx playwright install --with-deps chromium
+dotnet publish SiteMonitor.Api.csproj -c Release
+# Render / Docker build
+cd SiteMonitor/SiteMonitor.Api
+npx playwright install --with-deps chromium
+dotnet publish SiteMonitor.Api.csproj -c Release
 ```
 
 Open the frontend (e.g., http://localhost:5173), paste a URL, click “Analyze,” and watch the dashboard populate. The backend logs each external call so you can trace errors (e.g., PageSpeed quotas, OpenAI latency).
@@ -115,11 +126,12 @@ Open the frontend (e.g., http://localhost:5173), paste a URL, click “Analyze,�
 ##  Development Notes
 
 - **HTTPS redirection** is enabled; in dev you may see “Failed to determine the https port” warnings if the launch profile only specifies HTTP—harmless, but set `ASPNETCORE_HTTPS_PORT` to silence it.
-- **Playwright** bundles platform-specific binaries; they stay out of Git thanks to `.gitignore`.
+- **Playwright** bundles platform-specific binaries; they stay out of Git thanks to `.gitignore`. Install headless deps on Render/Docker with `npx playwright install --with-deps chromium`.
 - **HistoryStore** currently uses a simple JSON file for demo purposes; swap in Redis/DB for multi-user scenarios.
 - **LinkHealthAnalyzer** uses `HttpClientFactory` + throttled HEAD/GET requests and backs off in Fast mode to avoid overloading hosts.
 - **AI prompt** enforces that every checklist bullet references the site and includes actionable steps, cleaning up any leftover Markdown checkboxes before rendering in React.
 - **Automated tests** cover scoring math, SEO parsing, recommendations, and link health; run them with `dotnet test`.
+- **Production notes** – Playwright requires `npx playwright install --with-deps chromium` on Render/Docker; history writes to a local JSON file (ephemeral on Render), so move it to persistent storage or turn history off for multi-user hosting. Adjust `Analysis:MaxConcurrentScans` to keep Render dynos from overloading.
 
 ---
 
@@ -149,3 +161,4 @@ CI-ready output ensures future refactors keep the analyzer trustworthy.
 - Scheduled scans + email summaries
 
 PRs welcome—just keep secrets out of commits and follow the scoring structure. Happy auditing! 
+- **Render deployment** – use the published output (`SiteMonitor.Api/bin/Release/net10.0/publish`) or set Render’s build command to `cd SiteMonitor/SiteMonitor.Api && npx playwright install --with-deps chromium && dotnet publish SiteMonitor.Api.csproj -c Release`.
