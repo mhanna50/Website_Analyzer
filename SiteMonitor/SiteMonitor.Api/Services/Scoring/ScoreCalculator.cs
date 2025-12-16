@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using SiteMonitor.Api.Models;
 
 namespace SiteMonitor.Api.Services.Scoring;
@@ -97,35 +98,72 @@ public static class ScoreCalculator
             return 0;
         }
 
-        if (performance is not null)
+        var channelScores = new List<(double Weight, double Score)>();
+
+        if (performance?.Mobile is not null)
         {
-            double weighted = 0;
-            double totalWeight = 0;
-
-            void AddMetric(double weight, double? score)
+            var mobileScore = CalculateChannelScore(performance.Mobile);
+            if (mobileScore.HasValue)
             {
-                if (score is null)
-                {
-                    return;
-                }
-
-                weighted += weight * score.Value;
-                totalWeight += weight;
-            }
-
-            AddMetric(0.35, ScoreFromRangeNullable(performance.LargestContentfulPaintMs, 2500, 6000));
-            AddMetric(0.15, ScoreFromRangeNullable(performance.FirstContentfulPaintMs, 1800, 4000));
-            AddMetric(0.2, ScoreFromRangeNullable(performance.TotalBlockingTimeMs, 200, 900));
-            AddMetric(0.15, ScoreFromRangeNullable(performance.CumulativeLayoutShift, 0.1, 0.25));
-            AddMetric(0.15, ScoreFromRangeNullable(network.ResponseTimeMs, 800, 4000));
-
-            if (totalWeight > 0)
-            {
-                return (int)Math.Round(weighted / totalWeight);
+                channelScores.Add((0.6, mobileScore.Value));
             }
         }
 
-        return (int)Math.Round(ScoreFromRange(network.ResponseTimeMs, 800, 4000));
+        if (performance?.Desktop is not null)
+        {
+            var desktopScore = CalculateChannelScore(performance.Desktop);
+            if (desktopScore.HasValue)
+            {
+                var weight = channelScores.Count == 0 ? 1.0 : 0.4;
+                channelScores.Add((weight, desktopScore.Value));
+            }
+        }
+
+        double? channelComposite = null;
+        if (channelScores.Count > 0)
+        {
+            var totalWeight = channelScores.Sum(s => s.Weight);
+            channelComposite = channelScores.Sum(s => s.Weight * s.Score) / totalWeight;
+        }
+
+        var networkScore = ScoreFromRange(network.ResponseTimeMs, 800, 4000);
+
+        if (channelComposite.HasValue)
+        {
+            return (int)Math.Round((channelComposite.Value * 0.85) + (networkScore * 0.15));
+        }
+
+        return (int)Math.Round(networkScore);
+    }
+
+    private static double? CalculateChannelScore(PerformanceChannelResult channel)
+    {
+        double weighted = 0;
+        double totalWeight = 0;
+
+        void AddMetric(double weight, double? score)
+        {
+            if (score is null)
+            {
+                return;
+            }
+
+            weighted += weight * score.Value;
+            totalWeight += weight;
+        }
+
+        AddMetric(0.35, ScoreFromRangeNullable(channel.LargestContentfulPaintMs, 2500, 6000));
+        AddMetric(0.15, ScoreFromRangeNullable(channel.FirstContentfulPaintMs, 1800, 4000));
+        AddMetric(0.2, ScoreFromRangeNullable(channel.TotalBlockingTimeMs, 200, 900));
+        AddMetric(0.15, ScoreFromRangeNullable(channel.CumulativeLayoutShift, 0.1, 0.25));
+        AddMetric(0.15, channel.Score);
+
+        if (totalWeight > 0)
+        {
+            return weighted / totalWeight;
+        }
+
+        return channel.Score;
     }
 
     private static double ScoreTextLength(int length, int idealMin, int idealMax)

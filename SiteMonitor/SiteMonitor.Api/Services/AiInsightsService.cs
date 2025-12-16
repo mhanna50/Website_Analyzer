@@ -105,14 +105,22 @@ public class AiInsightsService
         builder.AppendLine($"Performance score: {analysis.Score.Speed}");
         builder.AppendLine($"SEO score: {analysis.Score.Seo}");
 
-        if (analysis.Performance is { } perf)
+        if (analysis.Performance?.Mobile is { } mobile)
         {
-            builder.AppendLine($"Largest Contentful Paint (ms): {perf.LargestContentfulPaintMs ?? 0}");
-            builder.AppendLine($"First Contentful Paint (ms): {perf.FirstContentfulPaintMs ?? 0}");
-            builder.AppendLine($"Cumulative Layout Shift: {perf.CumulativeLayoutShift ?? 0}");
-            builder.AppendLine($"Total Blocking Time (ms): {perf.TotalBlockingTimeMs ?? 0}");
-            builder.AppendLine($"Desktop score: {perf.DesktopScore ?? 0}");
-            builder.AppendLine($"Mobile score: {perf.MobileScore ?? 0}");
+            builder.AppendLine($"Mobile score: {mobile.Score ?? 0}");
+            builder.AppendLine($"Mobile Largest Contentful Paint (ms): {mobile.LargestContentfulPaintMs ?? 0}");
+            builder.AppendLine($"Mobile First Contentful Paint (ms): {mobile.FirstContentfulPaintMs ?? 0}");
+            builder.AppendLine($"Mobile Cumulative Layout Shift: {mobile.CumulativeLayoutShift ?? 0}");
+            builder.AppendLine($"Mobile Total Blocking Time (ms): {mobile.TotalBlockingTimeMs ?? 0}");
+        }
+
+        if (analysis.Performance?.Desktop is { } desktop)
+        {
+            builder.AppendLine($"Desktop score: {desktop.Score ?? 0}");
+            builder.AppendLine($"Desktop Largest Contentful Paint (ms): {desktop.LargestContentfulPaintMs ?? 0}");
+            builder.AppendLine($"Desktop First Contentful Paint (ms): {desktop.FirstContentfulPaintMs ?? 0}");
+            builder.AppendLine($"Desktop Cumulative Layout Shift: {desktop.CumulativeLayoutShift ?? 0}");
+            builder.AppendLine($"Desktop Total Blocking Time (ms): {desktop.TotalBlockingTimeMs ?? 0}");
         }
 
         if (analysis.Performance?.Suggestions is { Count: > 0 } perfSuggestions)

@@ -10,13 +10,6 @@ export type NetworkResult = {
   redirectCount: number
 }
 
-export type BrokenLink = {
-  url: string
-  isInternal: boolean
-  statusCode: number
-  reason?: string | null
-}
-
 export type SeoResult = {
   title: string
   titleLength: number
@@ -42,8 +35,6 @@ export type SeoResult = {
   structuredDataTypes: string[]
   hasOpenGraphTags: boolean
   hasTwitterCard: boolean
-  brokenLinkCount: number
-  brokenLinks: BrokenLink[]
 }
 
 export type ScoreResult = {
@@ -52,14 +43,18 @@ export type ScoreResult = {
   speed: number
 }
 
-export type PerformanceResult = {
-  overallScore?: number | null
-  mobileScore?: number | null
-  desktopScore?: number | null
+export type PerformanceChannel = {
+  strategy: 'mobile' | 'desktop' | string
+  score?: number | null
   largestContentfulPaintMs?: number | null
   firstContentfulPaintMs?: number | null
   cumulativeLayoutShift?: number | null
   totalBlockingTimeMs?: number | null
+}
+
+export type PerformanceResult = {
+  mobile?: PerformanceChannel | null
+  desktop?: PerformanceChannel | null
   suggestions?: PerformanceSuggestion[]
 }
 

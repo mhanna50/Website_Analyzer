@@ -17,6 +17,8 @@ export default function ReportView({
   const perfScore = analysis.score.speed
   const seoScore = analysis.score.seo
   const performance = analysis.performance
+  const mobilePerformance = performance?.mobile ?? null
+  const desktopPerformance = performance?.desktop ?? null
   const schemaSummary = formatSchemaTypes(analysis.seo.structuredDataTypes)
   const aiSections = parseAiInsights(analysis.aiInsights?.recommendations ?? '')
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
@@ -24,7 +26,7 @@ export default function ReportView({
     network:
       'URL + HTTP status confirm uptime, response time shows latency, and the error row surfaces TLS/server failures.',
     headings:
-      'H1/H2 counts validate content hierarchy, image alt coverage shows accessibility, and link mix highlights crawl paths and broken links.',
+      'H1/H2 counts validate content hierarchy, image alt coverage shows accessibility, and link mix highlights crawl paths.',
     accessibility:
       'Language attribute, skip links, landmarks, and labeled inputs indicate whether assistive technologies can navigate the page.',
     structured:
@@ -54,9 +56,6 @@ export default function ReportView({
   if (analysis.seo.imagesWithoutAlt > 0) {
     headingFixes.push('Supply alt text for each decorative/product image so screen readers understand the content.')
   }
-  if (analysis.seo.brokenLinkCount > 0) {
-    headingFixes.push(`Fix the ${analysis.seo.brokenLinkCount} broken link(s) so users and bots avoid 404 pages.`)
-  }
 
   const accessibilityFixes: string[] = []
   if (!analysis.seo.hasLanguageAttribute) {
@@ -85,12 +84,6 @@ export default function ReportView({
 
   return (
     <section className="report-view report-appear">
-      {analysis.seo.brokenLinkCount > 0 && (
-        <div className="broken-link-callout">
-          <strong>{analysis.seo.brokenLinkCount} broken link(s) detected</strong>
-          <span>Fix the URLs listed below to stop wasting crawl budget and sending users to 404s.</span>
-        </div>
-      )}
       <div className="score-grid">
         <div className="score-card">
           <header>
@@ -105,13 +98,58 @@ export default function ReportView({
             reactive, smoother experience.
           </p>
           <dl>
-            <Metric label="Largest Contentful Paint" value={formatMilliseconds(performance?.largestContentfulPaintMs)} />
-            <Metric label="First Contentful Paint" value={formatMilliseconds(performance?.firstContentfulPaintMs)} />
+            <Metric
+              label="Mobile score"
+              value={
+                typeof mobilePerformance?.score === 'number'
+                  ? formatMetricValue(formatScore(mobilePerformance.score), mobilePerformance.score >= 85)
+                  : 'N/A'
+              }
+            />
+            <Metric
+              label="Desktop score"
+              value={
+                typeof desktopPerformance?.score === 'number'
+                  ? formatMetricValue(formatScore(desktopPerformance.score), desktopPerformance.score >= 85)
+                  : 'N/A'
+              }
+            />
+            <Metric
+              label="Largest Contentful Paint"
+              value={
+                <MetricComparison
+                  mobile={mobilePerformance && formatMilliseconds(mobilePerformance.largestContentfulPaintMs)}
+                  desktop={desktopPerformance && formatMilliseconds(desktopPerformance.largestContentfulPaintMs)}
+                />
+              }
+            />
+            <Metric
+              label="First Contentful Paint"
+              value={
+                <MetricComparison
+                  mobile={mobilePerformance && formatMilliseconds(mobilePerformance.firstContentfulPaintMs)}
+                  desktop={desktopPerformance && formatMilliseconds(desktopPerformance.firstContentfulPaintMs)}
+                />
+              }
+            />
             <Metric
               label="Cumulative Layout Shift"
-              value={formatNumber(performance?.cumulativeLayoutShift)}
+              value={
+                <MetricComparison
+                  mobile={mobilePerformance && formatNumber(mobilePerformance.cumulativeLayoutShift)}
+                  desktop={desktopPerformance && formatNumber(desktopPerformance.cumulativeLayoutShift)}
+                />
+              }
             />
-            <Metric label="Total Blocking Time" value={formatMilliseconds(performance?.totalBlockingTimeMs)} />
+            <Metric
+              label="Total Blocking Time"
+              value={
+                <MetricComparison
+                  mobile={mobilePerformance && formatMilliseconds(mobilePerformance.totalBlockingTimeMs)}
+                  desktop={desktopPerformance && formatMilliseconds(desktopPerformance.totalBlockingTimeMs)}
+                />
+              }
+            />
           </dl>
           <div className="list-card">
             <p className="list-title">What this means:</p>
@@ -209,13 +247,6 @@ export default function ReportView({
               label="Internal / external links"
               value={`${analysis.seo.internalLinkCount}/${analysis.seo.externalLinkCount}`}
             />
-            <Metric
-              label="Broken links"
-              value={formatMetricValue(
-                analysis.seo.brokenLinkCount,
-                analysis.seo.brokenLinkCount === 0,
-              )}
-            />
           </dl>
           {renderSectionFixes('headings', headingFixes, openSections, setOpenSections)}
         </article>
@@ -290,25 +321,6 @@ export default function ReportView({
           </dl>
           {renderSectionFixes('structured', structuredFixes, openSections, setOpenSections)}
         </article>
-        {analysis.seo.brokenLinkCount > 0 && (
-          <article>
-            <h3>Link health</h3>
-            <dl>
-              <Metric label="Broken links" value={analysis.seo.brokenLinkCount} />
-            </dl>
-            <div className="list-card">
-              <p className="list-title">Fix these URLs first:</p>
-              <ul>
-                {analysis.seo.brokenLinks.slice(0, 5).map((link) => (
-                  <li key={link.url}>
-                    <span>{link.url}</span>
-                    <small>{formatBrokenLinkReason(link)}</small>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        )}
         {analysis.offPageSeo && (
           <article>
             <h3>Off-page SEO</h3>
@@ -375,6 +387,29 @@ function Metric({
     <div className={`metric-row${isUrl ? ' metric-row--url' : ''}`}>
       <dt>{label}</dt>
       <dd>{value ?? 'N/A'}</dd>
+    </div>
+  )
+}
+
+function MetricComparison({ mobile, desktop }: { mobile?: ReactNode; desktop?: ReactNode }) {
+  if (!mobile && !desktop) {
+    return 'N/A'
+  }
+
+  return (
+    <div className="metric-comparison">
+      {mobile && (
+        <span>
+          <strong>M</strong>
+          {mobile}
+        </span>
+      )}
+      {desktop && (
+        <span>
+          <strong>D</strong>
+          {desktop}
+        </span>
+      )}
     </div>
   )
 }
@@ -493,14 +528,6 @@ function slugify(value: string) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') || 'section'
   )
-}
-
-function formatBrokenLinkReason(link: AnalysisResult['seo']['brokenLinks'][number]) {
-  if (link.statusCode === 0) {
-    return link.reason ?? 'Connection failed'
-  }
-  const suffix = link.reason ? ` – ${link.reason}` : ''
-  return `${link.statusCode}${suffix}`
 }
 
 function formatMetricValue(value: ReactNode, isGood: boolean) {

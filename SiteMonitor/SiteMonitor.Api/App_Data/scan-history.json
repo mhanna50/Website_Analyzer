@@ -286,5 +286,77 @@
     "overallScore": 62,
     "seoScore": 70,
     "speedScore": 56
+  },
+  {
+    "url": "https://www.apple.com/",
+    "timestampUtc": "2025-12-16T19:57:04.066221Z",
+    "statusCode": 200,
+    "responseTimeMs": 348,
+    "performanceScore": 64,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 66,
+    "seoScore": 81,
+    "speedScore": 56
+  },
+  {
+    "url": "https://www.apple.com/",
+    "timestampUtc": "2025-12-16T20:12:07.44114Z",
+    "statusCode": 200,
+    "responseTimeMs": 204,
+    "performanceScore": 56,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 62,
+    "seoScore": 80,
+    "speedScore": 50
+  },
+  {
+    "url": "https://www.construct.net/",
+    "timestampUtc": "2025-12-16T20:31:16.891593Z",
+    "statusCode": 200,
+    "responseTimeMs": 255,
+    "performanceScore": 60,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 69,
+    "seoScore": 97,
+    "speedScore": 50
+  },
+  {
+    "url": "https://colonialconstructionde.com/",
+    "timestampUtc": "2025-12-16T20:38:52.063409Z",
+    "statusCode": 403,
+    "responseTimeMs": 140,
+    "performanceScore": 53,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 28,
+    "seoScore": 69,
+    "speedScore": 0
+  },
+  {
+    "url": "https://www.ediscompany.com/",
+    "timestampUtc": "2025-12-16T20:48:49.521998Z",
+    "statusCode": 403,
+    "responseTimeMs": 126,
+    "performanceScore": 68,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 30,
+    "seoScore": 74,
+    "speedScore": 0
+  },
+  {
+    "url": "https://www.hannawebstudio.com/",
+    "timestampUtc": "2025-12-16T20:50:12.372946Z",
+    "statusCode": 200,
+    "responseTimeMs": 155,
+    "performanceScore": 60,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 63,
+    "seoScore": 70,
+    "speedScore": 59
   }
 ]

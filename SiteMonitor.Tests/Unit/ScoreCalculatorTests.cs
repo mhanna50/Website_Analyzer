@@ -33,9 +33,7 @@ public class ScoreCalculatorTests
             StructuredDataCount: 1,
             StructuredDataTypes: new[] { "Organization" },
             HasOpenGraphTags: true,
-            HasTwitterCard: true,
-            BrokenLinkCount: 0,
-            BrokenLinks: Array.Empty<BrokenLink>());
+            HasTwitterCard: true);
 
         var score = ScoreCalculator.CalculateSeoScore(seo);
 
@@ -69,9 +67,7 @@ public class ScoreCalculatorTests
             StructuredDataCount: 0,
             StructuredDataTypes: Array.Empty<string>(),
             HasOpenGraphTags: false,
-            HasTwitterCard: false,
-            BrokenLinkCount: 5,
-            BrokenLinks: new[] { new BrokenLink("https://example.com/missing", true, 404, "Not Found") });
+            HasTwitterCard: false);
 
         var score = ScoreCalculator.CalculateSeoScore(seo);
 
@@ -103,13 +99,20 @@ public class ScoreCalculatorTests
     {
         var seo = SeoResult.Empty with { IsIndexable = true };
         var performance = new PerformanceResult(
-            OverallScore: 90,
-            MobileScore: 90,
-            DesktopScore: 90,
-            LargestContentfulPaintMs: 1200,
-            FirstContentfulPaintMs: 800,
-            CumulativeLayoutShift: 0.05,
-            TotalBlockingTimeMs: 100,
+            Mobile: new PerformanceChannelResult(
+                Strategy: "mobile",
+                Score: 90,
+                LargestContentfulPaintMs: 1200,
+                FirstContentfulPaintMs: 800,
+                CumulativeLayoutShift: 0.05,
+                TotalBlockingTimeMs: 100),
+            Desktop: new PerformanceChannelResult(
+                Strategy: "desktop",
+                Score: 92,
+                LargestContentfulPaintMs: 1000,
+                FirstContentfulPaintMs: 700,
+                CumulativeLayoutShift: 0.03,
+                TotalBlockingTimeMs: 80),
             Suggestions: Array.Empty<PerformanceSuggestion>());
         var network = new NetworkResult("https://example.com", 200, 800, DateTime.UtcNow, null, 0);
 

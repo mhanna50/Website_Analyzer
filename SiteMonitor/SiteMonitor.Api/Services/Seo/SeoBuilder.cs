@@ -14,10 +14,8 @@ public static class SeoBuilder
         Uri siteUri,
         string html,
         HttpResponseMessage? response,
-        SpaDomAnalysisResult? spaDomResult,
-        out IReadOnlyList<string> crawlableLinks)
+        SpaDomAnalysisResult? spaDomResult)
     {
-        crawlableLinks = Array.Empty<string>();
         var usesHttps = string.Equals(siteUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
         var domFromHeadless = spaDomResult is not null;
 
@@ -80,7 +78,6 @@ public static class SeoBuilder
         }
 
         var linkNodes = document.DocumentNode.SelectNodes("//a[@href]");
-        var crawlableLinkTargets = new List<string>();
         var calculatedInternalLinks = 0;
         var calculatedExternalLinks = 0;
         if (linkNodes is not null)
@@ -93,30 +90,27 @@ public static class SeoBuilder
                     continue;
                 }
 
-            if (Uri.TryCreate(href, UriKind.Absolute, out var hrefUri))
-            {
-                crawlableLinkTargets.Add(hrefUri.ToString());
-                if (string.Equals(hrefUri.Host, siteUri.Host, StringComparison.OrdinalIgnoreCase))
+                if (Uri.TryCreate(href, UriKind.Absolute, out var hrefUri))
+                {
+                    if (string.Equals(hrefUri.Host, siteUri.Host, StringComparison.OrdinalIgnoreCase))
+                    {
+                        calculatedInternalLinks++;
+                    }
+                    else
+                    {
+                        calculatedExternalLinks++;
+                    }
+                }
+                else if (Uri.TryCreate(siteUri, href, out _))
                 {
                     calculatedInternalLinks++;
                 }
                 else
                 {
-                    calculatedExternalLinks++;
+                    calculatedInternalLinks++;
                 }
             }
-            else if (Uri.TryCreate(siteUri, href, out var resolved))
-            {
-                crawlableLinkTargets.Add(resolved.ToString());
-                calculatedInternalLinks++;
-            }
-            else
-            {
-                calculatedInternalLinks++;
-            }
         }
-        }
-        crawlableLinks = crawlableLinkTargets;
 
         var hasLanguageAttribute = HasLanguageAttribute(document);
         var hasSkipLink = HasSkipLink(document);
@@ -158,9 +152,7 @@ public static class SeoBuilder
             structuredDataCount,
             structuredDataTypes,
             hasOpenGraphTags,
-            hasTwitterCard,
-            0,
-            Array.Empty<BrokenLink>());
+            hasTwitterCard);
     }
 
     private static bool HasNoIndexDirective(HtmlDocument document, HttpResponseMessage? response)

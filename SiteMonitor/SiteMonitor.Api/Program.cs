@@ -23,7 +23,6 @@ builder.Services.AddSingleton<OffPageSeoService>();
 builder.Services.AddSingleton<HistoryStore>();
 builder.Services.AddSingleton<ReportRenderer>();
 builder.Services.AddSingleton<AiInsightsService>();
-builder.Services.AddSingleton<LinkHealthAnalyzer>();
 builder.Services.AddSingleton<AnalysisThrottler>();
 builder.Services.AddSingleton<WebsiteAnalyzer>();
 builder.Services.AddSingleton<ScanQueue>();

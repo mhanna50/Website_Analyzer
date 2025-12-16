@@ -849,11 +849,32 @@ html {
   margin: 0;
   color: #ececf1;
   font-weight: 600;
-  word-break: normal;
-  overflow-wrap: normal;
-  white-space: nowrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
   text-align: right;
   max-width: 60%;
+}
+
+.metric-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+}
+
+.metric-comparison span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #ececf1;
+}
+
+.metric-comparison strong {
+  font-size: 0.65rem;
+  color: #8e8ea0;
+  letter-spacing: 0.1em;
 }
 
 .metric-row--url {
@@ -909,23 +930,6 @@ html {
   flex-wrap: wrap;
   gap: 18px;
   align-items: flex-start;
-}
-
-.broken-link-callout {
-  border: 1px solid rgba(255, 133, 133, 0.3);
-  background: rgba(255, 45, 45, 0.08);
-  color: #ffbcbc;
-  border-radius: 18px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.9rem;
-}
-
-.broken-link-callout strong {
-  font-size: 0.95rem;
 }
 
 .detail-grid article {

@@ -16,7 +16,6 @@ public class WebsiteAnalyzer
     private readonly OffPageSeoService _offPageSeoService;
     private readonly HistoryStore _historyStore;
     private readonly AiInsightsService _aiInsightsService;
-    private readonly LinkHealthAnalyzer _linkHealthAnalyzer;
     private readonly AnalysisThrottler _analysisThrottler;
 
     public WebsiteAnalyzer(
@@ -26,7 +25,6 @@ public class WebsiteAnalyzer
         OffPageSeoService offPageSeoService,
         HistoryStore historyStore,
         AiInsightsService aiInsightsService,
-        LinkHealthAnalyzer linkHealthAnalyzer,
         AnalysisThrottler analysisThrottler)
     {
         _httpClientFactory = httpClientFactory;
@@ -35,7 +33,6 @@ public class WebsiteAnalyzer
         _offPageSeoService = offPageSeoService;
         _historyStore = historyStore;
         _aiInsightsService = aiInsightsService;
-        _linkHealthAnalyzer = linkHealthAnalyzer;
         _analysisThrottler = analysisThrottler;
     }
 
@@ -131,25 +128,8 @@ public class WebsiteAnalyzer
             }
         }
 
-        var seo = SeoBuilder.BuildSeoResult(siteUri, html, response, spaDomResult, out var crawlableLinks);
+        var seo = SeoBuilder.BuildSeoResult(siteUri, html, response, spaDomResult);
         response?.Dispose();
-
-        try
-        {
-            var brokenLinks = await _linkHealthAnalyzer.FindBrokenLinksAsync(siteUri, crawlableLinks, mode, cancellationToken);
-            if (brokenLinks.Count > 0)
-            {
-                seo = seo with
-                {
-                    BrokenLinkCount = brokenLinks.Count,
-                    BrokenLinks = brokenLinks
-                };
-            }
-        }
-        catch
-        {
-            // Ignore link health issues to keep the scan resilient.
-        }
 
         PerformanceResult? performance = null;
         if (mode != ScanMode.Fast)
@@ -186,7 +166,7 @@ public class WebsiteAnalyzer
                 network.CheckedAtUtc,
                 network.StatusCode,
                 network.ResponseTimeMs,
-                performance?.OverallScore,
+                performance?.Mobile?.Score ?? performance?.Desktop?.Score,
                 seo.IsIndexable,
                 seo.UsesHttps,
                 score.Overall,

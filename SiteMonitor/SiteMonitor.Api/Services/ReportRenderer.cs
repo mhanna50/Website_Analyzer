@@ -156,14 +156,30 @@ public class ReportRenderer
         builder.AppendLine(BuildSummaryCard("Status", report.Performance.Network.StatusCode.ToString()));
         builder.AppendLine(BuildSummaryCard("Response Time", $"{report.Performance.Network.ResponseTimeMs} ms"));
         builder.AppendLine(BuildSummaryCard("Redirects", report.Performance.Network.RedirectCount.ToString()));
-        if (report.Performance.Details is { } perf)
-        {
-            builder.AppendLine(BuildSummaryCard("LCP", FormatMs(perf.LargestContentfulPaintMs)));
-            builder.AppendLine(BuildSummaryCard("FCP", FormatMs(perf.FirstContentfulPaintMs)));
-            builder.AppendLine(BuildSummaryCard("CLS", FormatNumber(perf.CumulativeLayoutShift)));
-            builder.AppendLine(BuildSummaryCard("TBT", FormatMs(perf.TotalBlockingTimeMs)));
-        }
         builder.AppendLine("</div>");
+
+        if (report.Performance.Details is { } perf && (perf.Mobile is not null || perf.Desktop is not null))
+        {
+            builder.AppendLine("<div class=\"grid\">");
+            if (perf.Mobile is not null)
+            {
+                builder.AppendLine(BuildSummaryCard("Mobile Score", FormatNumber(perf.Mobile.Score)));
+                builder.AppendLine(BuildSummaryCard("Mobile LCP", FormatMs(perf.Mobile.LargestContentfulPaintMs)));
+                builder.AppendLine(BuildSummaryCard("Mobile FCP", FormatMs(perf.Mobile.FirstContentfulPaintMs)));
+                builder.AppendLine(BuildSummaryCard("Mobile CLS", FormatNumber(perf.Mobile.CumulativeLayoutShift)));
+                builder.AppendLine(BuildSummaryCard("Mobile TBT", FormatMs(perf.Mobile.TotalBlockingTimeMs)));
+            }
+            if (perf.Desktop is not null)
+            {
+                builder.AppendLine(BuildSummaryCard("Desktop Score", FormatNumber(perf.Desktop.Score)));
+                builder.AppendLine(BuildSummaryCard("Desktop LCP", FormatMs(perf.Desktop.LargestContentfulPaintMs)));
+                builder.AppendLine(BuildSummaryCard("Desktop FCP", FormatMs(perf.Desktop.FirstContentfulPaintMs)));
+                builder.AppendLine(BuildSummaryCard("Desktop CLS", FormatNumber(perf.Desktop.CumulativeLayoutShift)));
+                builder.AppendLine(BuildSummaryCard("Desktop TBT", FormatMs(perf.Desktop.TotalBlockingTimeMs)));
+            }
+            builder.AppendLine("</div>");
+        }
+
         builder.AppendLine("</div>");
 
         builder.AppendLine("<div class=\"section\">");
@@ -177,7 +193,6 @@ public class ReportRenderer
         builder.AppendLine(BuildSummaryCard("Images Missing Alt", report.Seo.Details.ImagesWithoutAlt.ToString()));
         builder.AppendLine(BuildSummaryCard("Internal Links", report.Seo.Details.InternalLinkCount.ToString()));
         builder.AppendLine(BuildSummaryCard("External Links", report.Seo.Details.ExternalLinkCount.ToString()));
-        builder.AppendLine(BuildSummaryCard("Broken Links", report.Seo.Details.BrokenLinkCount.ToString()));
         builder.AppendLine("</div>");
         builder.AppendLine("</div>");
 

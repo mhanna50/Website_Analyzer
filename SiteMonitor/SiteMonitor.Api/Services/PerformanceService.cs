@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using SiteMonitor.Api.Models;
 
@@ -31,26 +32,55 @@ public class PerformanceService
         }
 
         var preferredStrategy = _configuration["PERFORMANCE_API_STRATEGY"];
-        var strategy = string.IsNullOrWhiteSpace(preferredStrategy)
-            ? "mobile"
-            : preferredStrategy;
+        var strategies = ResolveStrategies(preferredStrategy);
 
-        var snapshot = await FetchSnapshotAsync(baseUrl, apiKey, url, strategy, cancellationToken);
+        var snapshots = new Dictionary<string, PerformanceSnapshot?>(StringComparer.OrdinalIgnoreCase);
+        foreach (var strategy in strategies)
+        {
+            snapshots[strategy] = await FetchSnapshotAsync(baseUrl, apiKey, url, strategy, cancellationToken);
+        }
 
-        if (snapshot is null)
+        if (snapshots.Values.All(s => s is null))
         {
             return null;
         }
 
+        snapshots.TryGetValue("mobile", out var mobileSnapshot);
+        snapshots.TryGetValue("desktop", out var desktopSnapshot);
+
+        var suggestionsSource = mobileSnapshot ?? desktopSnapshot ?? snapshots.Values.First(s => s is not null);
         return new PerformanceResult(
+            mobileSnapshot is not null ? ToChannelResult("mobile", mobileSnapshot) : null,
+            desktopSnapshot is not null ? ToChannelResult("desktop", desktopSnapshot) : null,
+            suggestionsSource?.Suggestions ?? Array.Empty<PerformanceSuggestion>());
+    }
+
+    private static string[] ResolveStrategies(string? preferred)
+    {
+        if (string.IsNullOrWhiteSpace(preferred))
+        {
+            return new[] { "mobile", "desktop" };
+        }
+
+        var tokens = preferred
+            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(t => t.ToLowerInvariant())
+            .Where(t => t is "mobile" or "desktop")
+            .Distinct()
+            .ToArray();
+
+        return tokens.Length == 0 ? new[] { "mobile", "desktop" } : tokens;
+    }
+
+    private static PerformanceChannelResult ToChannelResult(string strategy, PerformanceSnapshot snapshot)
+    {
+        return new PerformanceChannelResult(
+            strategy,
             snapshot.Score,
-            strategy.Equals("mobile", StringComparison.OrdinalIgnoreCase) ? snapshot.Score : null,
-            strategy.Equals("desktop", StringComparison.OrdinalIgnoreCase) ? snapshot.Score : null,
             snapshot.LargestContentfulPaintMs,
             snapshot.FirstContentfulPaintMs,
             snapshot.CumulativeLayoutShift,
-            snapshot.TotalBlockingTimeMs,
-            snapshot.Suggestions);
+            snapshot.TotalBlockingTimeMs);
     }
 
     private async Task<PerformanceSnapshot?> FetchSnapshotAsync(

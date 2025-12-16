@@ -94,16 +94,6 @@ public static class RecommendationBuilder
                 "Accessibility"));
         }
 
-        if (analysis.Seo.BrokenLinkCount > 0)
-        {
-            var sample = analysis.Seo.BrokenLinks.Take(3).Select(l => l.Url);
-            var example = string.Join(", ", sample);
-            recommendations.Add(new Recommendation(
-                "Repair broken links",
-                $"Found {analysis.Seo.BrokenLinkCount} broken links (e.g., {example}). Update or remove them to avoid crawl waste and 404 UX traps.",
-                "SEO"));
-        }
-
         return recommendations;
     }
 

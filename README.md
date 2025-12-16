@@ -12,7 +12,6 @@ A full-stack tool that audits any URL for performance, on-page SEO, accessibilit
 - **On-page SEO** – title/meta/canonical quality, headings, viewport meta, indexability, robots directives, internal/external link counts, image alt coverage (even on SPAs thanks to Playwright DOM rendering).
 - **Accessibility heuristics** – missing `lang`, skip links, landmarks, unlabeled form controls, and actionable fix lists inside each card.
 - **Structured data & social tags** – JSON-LD counts/types, Open Graph, Twitter cards, plus contextual tooltips so teammates know why these fields matter.
-- **Link health** – crawls rendered DOM links and performs async HTTP checks to flag broken internal/external URLs.
 - **Scan modes** – Fast mode skips heavy services for instant triage, Deep mode runs the full Playwright + off-page + AI stack.
 - **Async queue + throttler** – background worker processes queued scans safely while per-instance throttling limits concurrent crawls.
 - **AI optimization checklist** – OpenAI produces markdown checklists that become interactive to-do lists in the UI.
@@ -62,7 +61,6 @@ flowchart TD
 - **Chat pane** – analyzer messages only (the “You” bubble is suppressed once a scan starts).
 - **Score cards** – smooth view transitions with descriptive tooltips and red/green status chips.
 - **Detail grid** – network, headings, accessibility, structured data & social, off-page, each with toggleable “Fix these” drawers.
-- **Link health callouts** – broken URLs appear both in the headings card and as top-level alerts.
 - **AI Checklist** – every OpenAI bullet becomes a persistent checkbox so you can track progress live.
 - **History panel** – collapsible desktop drawer + mobile overlay.
 - **Download PDF** – fetches `/api/report/pdf` to hand clients a shareable artifact.
@@ -86,11 +84,13 @@ Both sync and async paths share the same analyzers, so escalating a queued scan 
    OPENAI_API_BASE_URL=https://api.openai.com/v1/chat/completions
    PERFORMANCE_API_KEY=AIza...
    PERFORMANCE_API_BASE_URL=https://www.googleapis.com/pagespeedonline/v5/runPagespeed
+   PERFORMANCE_API_STRATEGY=mobile,desktop
    ```
-2. `.env` is gitignored; `LoadDotEnv()` walks up directories so the API finds it even when running from `SiteMonitor/SiteMonitor.Api/`.
-3. `appsettings*.json` contains empty placeholders, keeping secrets out of commits.
-4. Set `ALLOWED_ORIGINS` (comma-separated list) before deploying to Render so CORS accepts your Vercel domain (e.g., `https://your-app.vercel.app`). Use `http://localhost:5173` for local dev.
-5. On Vercel, set `VITE_API_BASE_URL=https://<your-render-app>.onrender.com` so the frontend calls the hosted API. For local dev, set `VITE_API_BASE_URL=http://localhost:5218`.
+2. Use `PERFORMANCE_API_STRATEGY` to decide which PageSpeed snapshots run: `mobile`, `desktop`, or a comma-separated list (default fetches both so the UI can compare them).
+3. `.env` is gitignored; `LoadDotEnv()` walks up directories so the API finds it even when running from `SiteMonitor/SiteMonitor.Api/`.
+4. `appsettings*.json` contains empty placeholders, keeping secrets out of commits.
+5. Set `ALLOWED_ORIGINS` (comma-separated list) before deploying to Render so CORS accepts your Vercel domain (e.g., `https://your-app.vercel.app`). Use `http://localhost:5173` for local dev.
+6. On Vercel, set `VITE_API_BASE_URL=https://<your-render-app>.onrender.com` so the frontend calls the hosted API. For local dev, set `VITE_API_BASE_URL=http://localhost:5218`.
 
 ---
 
@@ -128,7 +128,6 @@ Open the frontend (e.g., http://localhost:5173), paste a URL, click “Analyze,�
 - **HTTPS redirection** is enabled; in dev you may see “Failed to determine the https port” warnings if the launch profile only specifies HTTP—harmless, but set `ASPNETCORE_HTTPS_PORT` to silence it.
 - **Playwright** bundles platform-specific binaries; they stay out of Git thanks to `.gitignore`. Install headless deps on Render/Docker with `npx playwright install --with-deps chromium`.
 - **HistoryStore** currently uses a simple JSON file for demo purposes; swap in Redis/DB for multi-user scenarios.
-- **LinkHealthAnalyzer** uses `HttpClientFactory` + throttled HEAD/GET requests and backs off in Fast mode to avoid overloading hosts.
 - **AI prompt** enforces that every checklist bullet references the site and includes actionable steps, cleaning up any leftover Markdown checkboxes before rendering in React.
 - **Automated tests** cover scoring math, SEO parsing, recommendations, and link health; run them with `dotnet test`.
 - **Production notes** – Playwright requires `npx playwright install --with-deps chromium` on Render/Docker; history writes to a local JSON file (ephemeral on Render), so move it to persistent storage or turn history off for multi-user hosting. Adjust `Analysis:MaxConcurrentScans` to keep Render dynos from overloading.
@@ -146,7 +145,6 @@ The suite uses xUnit to validate:
 
 - `SeoBuilder` (headings/accessibility parsing & SPA overrides)
 - `ScoreCalculator` weighting and overall math
-- `LinkHealthAnalyzer` concurrency limits and internal/external detection
 - `RecommendationBuilder` generation + AI checklist parsing
 
 CI-ready output ensures future refactors keep the analyzer trustworthy.

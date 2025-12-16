@@ -18,8 +18,8 @@ export default function SplashScreen({ onContinue }: SplashScreenProps) {
         <div className="splash-text">
           <p>
             <strong>What it does.</strong> Renders the DOM (even SPA routes), runs PageSpeed, checks
-            structured data and social tags, probes for broken links, and feeds the results into an
-            AI checklist that becomes an interactive to-do list.
+            structured data and social tags, and feeds the results into an AI checklist that becomes
+            an interactive to-do list.
           </p>
           <p>
             <strong>How to use it.</strong> Paste a URL and press enter to perform a deep search. Let the queue

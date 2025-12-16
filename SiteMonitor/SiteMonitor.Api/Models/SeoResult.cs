@@ -27,9 +27,7 @@ public record SeoResult(
     int StructuredDataCount,
     IReadOnlyList<string> StructuredDataTypes,
     bool HasOpenGraphTags,
-    bool HasTwitterCard,
-    int BrokenLinkCount,
-    IReadOnlyList<BrokenLink> BrokenLinks)
+    bool HasTwitterCard)
 {
     public static SeoResult Empty { get; } = new(
         string.Empty,
@@ -55,7 +53,5 @@ public record SeoResult(
         0,
         Array.Empty<string>(),
         false,
-        false,
-        0,
-        Array.Empty<BrokenLink>());
+        false);
 }
