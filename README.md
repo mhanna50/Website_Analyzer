@@ -91,6 +91,7 @@ Both sync and async paths share the same analyzers, so escalating a queued scan 
 4. `appsettings*.json` contains empty placeholders, keeping secrets out of commits.
 5. Set `ALLOWED_ORIGINS` (comma-separated list) before deploying to Render so CORS accepts your Vercel domain (e.g., `https://your-app.vercel.app`). Use `http://localhost:5173` for local dev.
 6. On Vercel, set `VITE_API_BASE_URL=https://<your-render-app>.onrender.com` so the frontend calls the hosted API. For local dev, set `VITE_API_BASE_URL=http://localhost:5218`.
+7. Keep the Render backend warm to avoid multi-minute cold starts. Add a repository secret named `WARM_PING_URL` that points to your Render root status endpoint (e.g., `https://performance-seo-api.onrender.com/`). The scheduled GitHub Action in `.github/workflows/warm-backend.yml` pings it every 15 minutes so the dyno stays awake; you can also trigger it manually with *Run workflow*.
 
 ---
 
@@ -131,6 +132,7 @@ Open the frontend (e.g., http://localhost:5173), paste a URL, click “Analyze,�
 - **AI prompt** enforces that every checklist bullet references the site and includes actionable steps, cleaning up any leftover Markdown checkboxes before rendering in React.
 - **Automated tests** cover scoring math, SEO parsing, recommendations, and link health; run them with `dotnet test`.
 - **Production notes** – Playwright requires `npx playwright install --with-deps chromium` on Render/Docker; history writes to a local JSON file (ephemeral on Render), so move it to persistent storage or turn history off for multi-user hosting. Adjust `Analysis:MaxConcurrentScans` to keep Render dynos from overloading.
+- **Cold-start UX** – the frontend pings the API root (with retries/backoff) on load and surfaces a “Waking the demo API…” banner or friendly error instead of Safari’s generic “Load failed.” Pair that with the keep-warm action to minimize impact from free-tier suspends.
 
 ---
 

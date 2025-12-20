@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import { analyzeWebsite, downloadReportPdf } from './api/analyzerApi'
+import { analyzeWebsite, downloadReportPdf, warmBackend } from './api/analyzerApi'
 import ChatView from './components/ChatView'
 import EmptyState from './components/EmptyState'
 import HistoryPanel from './components/HistoryPanel'
@@ -36,6 +36,7 @@ function App() {
   const [checklists, setChecklists] = useState<Record<string, Record<string, boolean>>>({})
   const [downloadingSessionId, setDownloadingSessionId] = useState<string | null>(null)
   const [isViewTransitioning, setIsViewTransitioning] = useState(false)
+  const [apiWarmMessage, setApiWarmMessage] = useState<string | null>(null)
 
   const currentSession = useMemo(() => {
     if (!selectedSessionId) {
@@ -72,6 +73,7 @@ function App() {
 
     setIsLoading(true)
     setError(null)
+    setApiWarmMessage(null)
     setInputValue('')
 
     const sessionId = createId()
@@ -114,8 +116,9 @@ function App() {
         ),
       )
     } catch (err) {
-      const message =
+      const rawMessage =
         err instanceof Error ? err.message : 'Unable to complete the analysis right now.'
+      const message = formatRequestError(rawMessage)
       setError(message)
       const failureMessage = {
         id: createId(),
@@ -189,8 +192,9 @@ function App() {
       document.body.removeChild(link)
       URL.revokeObjectURL(objectUrl)
     } catch (err) {
-      const message =
+      const rawMessage =
         err instanceof Error ? err.message : 'Unable to download the report PDF right now.'
+      const message = formatRequestError(rawMessage)
       console.error(err)
       setError(message)
     } finally {
@@ -201,6 +205,30 @@ function App() {
   const placeholder = showEmptyState
     ? 'Paste a website URL (https://example.com)'
     : 'Enter another website URL (https://example.com)'
+
+  useEffect(() => {
+    let isMounted = true
+
+    const wakeBackend = async () => {
+      setApiWarmMessage('Waking the demo API… first response may take 20–30 seconds.')
+      try {
+        await warmBackend({ retries: 2, delayMs: 1000 })
+        if (isMounted) {
+          setApiWarmMessage(null)
+        }
+      } catch (err) {
+        if (isMounted) {
+          const friendly = formatRequestError(err instanceof Error ? err.message : 'Failed to reach API.')
+          setApiWarmMessage(friendly)
+        }
+      }
+    }
+
+    void wakeBackend()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     setIsViewTransitioning(true)
@@ -234,7 +262,7 @@ function App() {
                   onChange={setInputValue}
                   onSubmit={handleSubmit}
                   isLoading={isLoading}
-                  error={error}
+                  error={error ?? apiWarmMessage}
                   placeholder={placeholder}
                 />
               ) : (
@@ -244,7 +272,7 @@ function App() {
                   onInputChange={setInputValue}
                   onSubmit={handleSubmit}
                   isLoading={isLoading}
-                  error={error}
+                  error={error ?? apiWarmMessage}
                   loadingMessage={loadingMessage}
                   placeholder={placeholder}
                   onDownloadReport={() => handleDownloadReport(currentSession)}
@@ -295,6 +323,18 @@ function buildReportFileName(url: string) {
   } catch {
     return 'site-report.pdf'
   }
+}
+
+function formatRequestError(message: string) {
+  const normalized = message.toLowerCase()
+  if (
+    normalized.includes('failed to fetch') ||
+    normalized.includes('load failed') ||
+    normalized.includes('network error')
+  ) {
+    return 'Unable to reach the demo API. It may still be waking up on the free tier—please try again shortly.'
+  }
+  return message
 }
 
 function deriveSessionTitle(input: string) {

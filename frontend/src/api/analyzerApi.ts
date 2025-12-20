@@ -1,5 +1,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5218'
+const DEFAULT_RETRIES = 2
+const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
 
 export type NetworkResult = {
   url: string
@@ -94,14 +96,44 @@ type AnalyzeRequest = {
   mode?: ScanMode
 }
 
+type RetryConfig = {
+  retries?: number
+  delayMs?: number
+}
+
+export async function warmBackend(config?: RetryConfig): Promise<boolean> {
+  const retries = config?.retries ?? 1
+  const delayMs = config?.delayMs ?? 1000
+
+  try {
+    const response = await requestWithRetry(
+      `${API_BASE_URL}/`,
+      {
+        method: 'GET',
+        cache: 'no-store',
+      },
+      retries,
+      delayMs,
+    )
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 export async function analyzeWebsite(url: string): Promise<AnalysisResult> {
-  const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await requestWithRetry(
+    `${API_BASE_URL}/api/analyze`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url } satisfies AnalyzeRequest),
     },
-    body: JSON.stringify({ url } satisfies AnalyzeRequest),
-  })
+    DEFAULT_RETRIES,
+    1500,
+  )
 
   if (!response.ok) {
     const message = await extractErrorMessage(response)
@@ -182,4 +214,39 @@ async function extractErrorMessage(response: Response) {
   }
 
   return response.statusText || 'Failed to analyze website.'
+}
+
+async function requestWithRetry(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  retries = DEFAULT_RETRIES,
+  delayMs = 1500,
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const response = await fetch(input, init)
+      if (!response.ok && shouldRetry(response) && attempt < retries) {
+        await wait(delayMs * (attempt + 1))
+        continue
+      }
+      return response
+    } catch (error) {
+      if (attempt >= retries) {
+        throw error
+      }
+      await wait(delayMs * (attempt + 1))
+    }
+  }
+
+  throw new Error('Request failed')
+}
+
+function shouldRetry(response: Response) {
+  return RETRYABLE_STATUS.has(response.status)
+}
+
+function wait(duration: number) {
+  return new Promise((resolve) => {
+    globalThis.setTimeout(resolve, duration)
+  })
 }
