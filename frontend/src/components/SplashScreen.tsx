@@ -37,6 +37,11 @@ export default function SplashScreen({ onContinue }: SplashScreenProps) {
           </p>
         </div>
 
+        <p className="splash-note">
+          This demo runs on free-tier Vercel and Render services, so cold starts after inactivity can
+          delay the first request. Please expect a short wait as the environment spins up.
+        </p>
+
         <button type="button" className="splash-cta" onClick={onContinue}>
           Enter the analyzer
         </button>

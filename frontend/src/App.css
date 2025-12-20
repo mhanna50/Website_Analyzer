@@ -1155,6 +1155,17 @@ html {
   color: #a7fff9;
 }
 
+.splash-note {
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffe2a7;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
 .splash-cta {
   align-self: flex-start;
   border: none;
