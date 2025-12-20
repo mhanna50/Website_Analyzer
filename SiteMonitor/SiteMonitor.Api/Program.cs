@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
+var enableHttpsRedirection = builder.Configuration.GetValue<bool>("ENABLE_HTTPS_REDIRECTION", builder.Environment.IsDevelopment());
 builder.Services.AddSingleton<SpaDomAnalyzer>();
 builder.Services.AddSingleton<PerformanceService>();
 builder.Services.AddSingleton<OffPageSeoService>();
@@ -49,9 +50,22 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+if (enableHttpsRedirection)
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors(FrontendCorsPolicy);
 app.UseRequestLogging();
+
+app.MapGet("/", () => Results.Ok(new
+    {
+        message = "Site Monitor API is running.",
+        docs = "/api/analyze"
+    }))
+    .WithName("RootStatus");
+
+app.MapMethods("/", new[] { "HEAD" }, () => Results.Ok());
 
 app.MapPost("/api/analyze", async (WebsiteAnalysisRequest request, WebsiteAnalyzer analyzer) =>
     {
