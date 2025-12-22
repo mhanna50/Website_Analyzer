@@ -37,8 +37,12 @@ export default function ReportView({
   if (analysis.network.statusCode === 0 || analysis.network.statusCode >= 400) {
     networkFixes.push('Resolve the HTTP errors so crawlers receive a successful 200 response.')
   }
-  if (analysis.network.responseTimeMs > 2000) {
-    networkFixes.push('Response time is slow. Add caching/CDN or reduce server work to consistently serve pages < 2s.')
+  const isSlowResponse = analysis.network.responseTimeMs > 1000
+  if (isSlowResponse) {
+    const formatted = formatMilliseconds(analysis.network.responseTimeMs)
+    networkFixes.push(
+      `Response time is ${formatted}. Cache the HTML at the edge or push heavy database work off the request path so TTFB stays under 1 second.`,
+    )
   }
   if (analysis.network.errorMessage) {
     networkFixes.push('Investigate the reported network error in your logs and ensure TLS/certs are valid.')

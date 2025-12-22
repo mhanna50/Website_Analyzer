@@ -358,5 +358,17 @@
     "overallScore": 63,
     "seoScore": 70,
     "speedScore": 59
+  },
+  {
+    "url": "https://www.hannawebstudio.com/",
+    "timestampUtc": "2025-12-20T18:56:07.584633Z",
+    "statusCode": 200,
+    "responseTimeMs": 230,
+    "performanceScore": 61,
+    "isIndexable": true,
+    "usesHttps": true,
+    "overallScore": 65,
+    "seoScore": 70,
+    "speedScore": 61
   }
 ]

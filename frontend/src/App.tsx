@@ -5,6 +5,7 @@ import ChatView from './components/ChatView'
 import EmptyState from './components/EmptyState'
 import HistoryPanel from './components/HistoryPanel'
 import SplashScreen from './components/SplashScreen'
+import { SEEDED_SESSIONS } from './data/seedSessions'
 import type { Session } from './types/chat'
 
 type ProgressStage = {
@@ -24,7 +25,7 @@ const PROGRESS_STAGES: ProgressStage[] = [
 const DEFAULT_LOADING_MESSAGE = PROGRESS_STAGES[0].label
 
 function App() {
-  const [sessions, setSessions] = useState<Session[]>([])
+  const [sessions, setSessions] = useState<Session[]>(() => [...SEEDED_SESSIONS])
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
